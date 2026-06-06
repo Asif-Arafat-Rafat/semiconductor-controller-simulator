@@ -17,6 +17,7 @@ add_executable(
     src/core/StateMachine.cpp
     src/equipment/WaferHandler.cpp
     src/equipment/ProcessChamber.cpp
+    src/equipment/VacuumSystem.cpp
 )
 
 target_include_directories(

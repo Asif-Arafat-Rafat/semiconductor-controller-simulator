@@ -3,6 +3,8 @@
 #include "core/MachineController.h"
 
 #include "equipment/WaferHandler.h"
+#include "equipment/VacuumSystem.h"
+
 
 const char* stateToString(MachineState state)
 {
@@ -53,58 +55,18 @@ void printState(
 
 int main()
 {
-        MachineController controller;
+    VacuumSystem vacuum;
 
-    std::cout << "Semiconductor Machine Controller\n";
-    std::cout << "================================\n\n";
+    std::cout << vacuum.isPumping() << '\n';
+    std::cout << vacuum.isVacuumReady() << '\n';
 
-    printState(
-        "Initial",
-        controller.getCurrentState()
-    );
+    vacuum.startPump();
 
-    controller.startMachine();
+    std::cout << vacuum.isPumping() << '\n';
+    std::cout << vacuum.isVacuumReady() << '\n';
 
-    printState(
-        "Start",
-        controller.getCurrentState()
-    );
+    vacuum.stopPump();
 
-    controller.initDone();
-
-    printState(
-        "Initialization complete",
-        controller.getCurrentState()
-    );
-
-    controller.waferLoaded();
-
-    printState(
-        "Wafer loaded",
-        controller.getCurrentState()
-    );
-
-    controller.processingDone();
-
-    printState(
-        "Process complete",
-        controller.getCurrentState()
-    );
-
-    controller.waferUnloaded();
-
-    printState(
-        "Wafer unloaded",
-        controller.getCurrentState()
-    );
-
-    controller.resetMachine();
-
-    printState(
-        "Reset",
-        controller.getCurrentState()
-    );
-
-    return 0;
-
-}
+    std::cout << vacuum.isPumping() << '\n';
+    std::cout << vacuum.isVacuumReady() << '\n';
+};
