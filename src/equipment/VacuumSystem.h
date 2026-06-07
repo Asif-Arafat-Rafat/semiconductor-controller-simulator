@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../sensors/PressureSensor.h"
 class VacuumSystem {
     public:
         VacuumSystem();
@@ -7,7 +7,8 @@ class VacuumSystem {
         bool stopPump();
         bool isVacuumReady() const;
         bool isPumping() const;
+        double readPressure() const;
     private:
-        bool vacuumReady;
         bool pumping;
+        PressureSensor pressureSensor;
 };

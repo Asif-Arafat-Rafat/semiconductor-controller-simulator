@@ -4,7 +4,7 @@
 
 #include "equipment/WaferHandler.h"
 #include "equipment/VacuumSystem.h"
-
+#include "sensors/PressureSensor.h"
 
 const char* stateToString(MachineState state)
 {
@@ -55,75 +55,24 @@ void printState(
 
 int main()
 {    
-    MachineController controller;
+VacuumSystem vacuum;
 
-    std::cout << "Semiconductor Machine Controller\n";
-    std::cout << "================================\n\n";
+std::cout << "Initial pressure: "
+          << vacuum.readPressure() << '\n';
 
-    printState(
-        "Initial",
-        controller.getCurrentState()
-    );
+std::cout << "Vacuum ready: "
+          << vacuum.isVacuumReady() << '\n';
 
-    if (!controller.startMachine()) {
-        std::cout << "Failed to start machine\n";
-        return 1;
-    }
+vacuum.startPump();
 
-    printState(
-        "Start",
-        controller.getCurrentState()
-    );
+std::cout << "After pump start: "
+          << vacuum.readPressure() << '\n';
 
-    if (!controller.initDone()) {
-        std::cout << "Initialization failed\n";
-        return 1;
-    }
+std::cout << "Vacuum ready: "
+          << vacuum.isVacuumReady() << '\n';
 
-    printState(
-        "Initialization complete",
-        controller.getCurrentState()
-    );
+vacuum.stopPump();
 
-    if (!controller.waferLoaded()) {
-        std::cout << "Wafer loading/processing preparation failed\n";
-        return 1;
-    }
-
-    printState(
-        "Wafer loaded and processing started",
-        controller.getCurrentState()
-    );
-
-    if (!controller.processingDone()) {
-        std::cout << "Processing failed\n";
-        return 1;
-    }
-
-    printState(
-        "Process complete",
-        controller.getCurrentState()
-    );
-
-    if (!controller.waferUnloaded()) {
-        std::cout << "Wafer unloading failed\n";
-        return 1;
-    }
-
-    printState(
-        "Wafer unloaded",
-        controller.getCurrentState()
-    );
-
-    if (!controller.resetMachine()) {
-        std::cout << "Reset failed\n";
-        return 1;
-    }
-
-    printState(
-        "Reset",
-        controller.getCurrentState()
-    );
-
-    return 0;
-};
+std::cout << "After pump stop: "
+          << vacuum.readPressure() << '\n';
+    };

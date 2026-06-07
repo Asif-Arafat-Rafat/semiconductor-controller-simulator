@@ -18,6 +18,7 @@ add_executable(
     src/equipment/WaferHandler.cpp
     src/equipment/ProcessChamber.cpp
     src/equipment/VacuumSystem.cpp
+    src/sensors/PressureSensor.cpp
 )
 
 target_include_directories(
