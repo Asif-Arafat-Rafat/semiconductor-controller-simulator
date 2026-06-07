@@ -29,6 +29,7 @@ bool MachineController::processingDone() {
     return stateMachine.transitionToState(MachineState::UNLOADING);
 }
 
+
 bool MachineController::waferLoaded()
 {
     if (stateMachine.getCurrentState() != MachineState::LOADING) {
@@ -47,6 +48,10 @@ bool MachineController::waferLoaded()
     if (!waferHandler.unloadWafer()) {
         return false;
     }
+    if (!processChamber.startVacuum()) {
+        return false;
+    }
+
 
     if (!processChamber.startProcessing()) {
         return false;

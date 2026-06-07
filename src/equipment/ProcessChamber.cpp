@@ -8,12 +8,17 @@ ProcessChamber::ProcessChamber()
 
 bool ProcessChamber::startProcessing()
 {
-    if (!waferPresent || processing) {
+    if (!waferPresent || processing || !vacuumSystem.isVacuumReady()) {
         return false;
     }
 
     processing = true;
     return true;
+}
+
+bool ProcessChamber::startVacuum()
+{
+    return vacuumSystem.startPump();
 }
 
 bool ProcessChamber::doneProcessing()

@@ -14,6 +14,7 @@ public:
 
     bool waferLoaded();
     bool waferUnloaded();
+    bool startPump();
 
     bool faultDetected();
 

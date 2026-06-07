@@ -1,5 +1,5 @@
 #pragma once
-
+#include "VacuumSystem.h"
 class ProcessChamber {
     public:
         ProcessChamber();
@@ -7,9 +7,11 @@ class ProcessChamber {
         bool unloadWafer();
         bool startProcessing();
         bool doneProcessing();
+        bool startVacuum();
         bool isProcessing() const;
         bool isWaferPresent() const;
     private:
         bool processing;
         bool waferPresent;
+        VacuumSystem vacuumSystem;
 };

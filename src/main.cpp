@@ -54,19 +54,76 @@ void printState(
 }
 
 int main()
-{
-    VacuumSystem vacuum;
+{    
+    MachineController controller;
 
-    std::cout << vacuum.isPumping() << '\n';
-    std::cout << vacuum.isVacuumReady() << '\n';
+    std::cout << "Semiconductor Machine Controller\n";
+    std::cout << "================================\n\n";
 
-    vacuum.startPump();
+    printState(
+        "Initial",
+        controller.getCurrentState()
+    );
 
-    std::cout << vacuum.isPumping() << '\n';
-    std::cout << vacuum.isVacuumReady() << '\n';
+    if (!controller.startMachine()) {
+        std::cout << "Failed to start machine\n";
+        return 1;
+    }
 
-    vacuum.stopPump();
+    printState(
+        "Start",
+        controller.getCurrentState()
+    );
 
-    std::cout << vacuum.isPumping() << '\n';
-    std::cout << vacuum.isVacuumReady() << '\n';
+    if (!controller.initDone()) {
+        std::cout << "Initialization failed\n";
+        return 1;
+    }
+
+    printState(
+        "Initialization complete",
+        controller.getCurrentState()
+    );
+
+    if (!controller.waferLoaded()) {
+        std::cout << "Wafer loading/processing preparation failed\n";
+        return 1;
+    }
+
+    printState(
+        "Wafer loaded and processing started",
+        controller.getCurrentState()
+    );
+
+    if (!controller.processingDone()) {
+        std::cout << "Processing failed\n";
+        return 1;
+    }
+
+    printState(
+        "Process complete",
+        controller.getCurrentState()
+    );
+
+    if (!controller.waferUnloaded()) {
+        std::cout << "Wafer unloading failed\n";
+        return 1;
+    }
+
+    printState(
+        "Wafer unloaded",
+        controller.getCurrentState()
+    );
+
+    if (!controller.resetMachine()) {
+        std::cout << "Reset failed\n";
+        return 1;
+    }
+
+    printState(
+        "Reset",
+        controller.getCurrentState()
+    );
+
+    return 0;
 };
