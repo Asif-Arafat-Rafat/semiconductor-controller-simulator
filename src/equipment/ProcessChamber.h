@@ -1,6 +1,6 @@
 #pragma once
 #include "VacuumSystem.h"
-#include "../sensors/TemperatureSensor.h"
+#include "../sensors/SensorManager.h"
 class ProcessChamber {
     public:
         ProcessChamber();
@@ -14,10 +14,10 @@ class ProcessChamber {
         bool isVacuumReady() const;
         double readTemperature() const;
         void setTemperature(double temp);
-        bool isTemperatureSafe();
+        bool isTemperatureSafe() const;
     private:
         bool processing;
         bool waferPresent;
         VacuumSystem vacuumSystem;
-        TemperatureSensor temperatureSensor;
+        SensorManager sensorManager;
 };

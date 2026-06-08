@@ -7,7 +7,10 @@ constexpr double MAX_PROCESS_TEMPERATURE = 303.15;
 }
 ProcessChamber::ProcessChamber()
     : waferPresent(false),
-      processing(false)
+      processing(false),
+      sensorManager(),
+      vacuumSystem(sensorManager)
+
 {
 }
 
@@ -73,14 +76,14 @@ bool ProcessChamber::unloadWafer()
 
 double ProcessChamber::readTemperature() const
 {
-    return temperatureSensor.readTemperature();
+    return sensorManager.readTemperature();
 }
 
 void ProcessChamber::setTemperature(double temp){
-    this->temperatureSensor.setTemperature(temp);
+    this->sensorManager.setTemperature(temp);
 }
 
-bool ProcessChamber::isTemperatureSafe(){
-    double temp = temperatureSensor.readTemperature();
+bool ProcessChamber::isTemperatureSafe() const{
+    double temp = sensorManager.readTemperature();
     return temp>=MIN_PROCESS_TEMPERATURE &&temp<=MAX_PROCESS_TEMPERATURE;
 }

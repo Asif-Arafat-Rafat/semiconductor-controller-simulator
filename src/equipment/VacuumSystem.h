@@ -3,11 +3,11 @@
 #include <atomic>
 #include <mutex>
 
-#include "../sensors/PressureSensor.h"
+#include "../sensors/SensorManager.h"
 
 class VacuumSystem {
     public:
-        VacuumSystem();
+        VacuumSystem(SensorManager& sensorManager);
         ~VacuumSystem();
         bool startPump();
         bool stopPump();
@@ -18,7 +18,7 @@ class VacuumSystem {
     private:
         std::atomic<bool> pumping;
         void updatePressure();
-        PressureSensor pressureSensor;
+        SensorManager& sensorManager;
         mutable std::mutex pressureMutex;
         std::thread pumpThread;
         void pumpLoop();

@@ -8,13 +8,15 @@ namespace {
     constexpr double ATMOSPHERIC_PRESSURE = 1000.0; 
     constexpr std::chrono::milliseconds SLEEP_DURATION(500); 
 }
-VacuumSystem::VacuumSystem():pumping(false){
+VacuumSystem::VacuumSystem(SensorManager& sensorManager)
+    :pumping(false),sensorManager(sensorManager){
 
-} 
+    }
+
 
 VacuumSystem::~VacuumSystem(){
+    pumping=false;
     if(pumpThread.joinable()){
-        pumping=false;
         pumpThread.join();
     }
 }
@@ -23,6 +25,11 @@ bool VacuumSystem::startPump(){
     if( isPumping()){
         return false;
     }
+    if (pumpThread.joinable()) {
+        pumpThread.join();
+    }
+
+
     pumping = true;
     pumpThread=std::thread(&VacuumSystem::pumpLoop,this);
     return true;
@@ -44,8 +51,8 @@ void VacuumSystem::pumpLoop()
 }
 void VacuumSystem::updatePressure(){
     std::lock_guard<std::mutex> lock(pressureMutex);
-    double pressure=pressureSensor.readPressure();
-    pressureSensor.setPressure(
+    double pressure=sensorManager.readPressure();
+    sensorManager.setPressure(
         std::max(TARGET_PRESSURE,pressure-PRESSURE_DECREMENT));
 }
 
@@ -58,19 +65,21 @@ bool VacuumSystem::stopPump(){
         pumpThread.join();
     }
     std::lock_guard<std::mutex> lock(pressureMutex);
-    pressureSensor.setPressure(ATMOSPHERIC_PRESSURE);
+    sensorManager.setPressure(ATMOSPHERIC_PRESSURE);
     return true;
 }
 
 
 
 bool VacuumSystem::isVacuumReady() const{
-    return pressureSensor.readPressure() <= TARGET_PRESSURE;
+    return sensorManager.readPressure() <= TARGET_PRESSURE;
 }
+
 bool VacuumSystem::isPumping() const{
     return pumping;
 }
+
 double VacuumSystem::readPressure() const{
     std::lock_guard<std::mutex> lock(pressureMutex);
-    return pressureSensor.readPressure();
+    return sensorManager.readPressure();
 }
