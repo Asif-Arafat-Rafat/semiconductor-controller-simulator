@@ -21,6 +21,11 @@ bool ProcessChamber::startVacuum()
     return vacuumSystem.startPump();
 }
 
+bool ProcessChamber::isVacuumReady() const
+{
+    return vacuumSystem.isVacuumReady();
+}
+
 bool ProcessChamber::doneProcessing()
 {
     if (!processing) {

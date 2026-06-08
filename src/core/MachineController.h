@@ -9,13 +9,13 @@ public:
     bool stopMachine();
     bool resetMachine();
     bool recoverMachine();
+    bool startProcessing();
     bool initDone();
     bool processingDone();
-
     bool waferLoaded();
     bool waferUnloaded();
     bool startPump();
-
+    bool vacuumReady();
     bool faultDetected();
 
     MachineState getCurrentState() const;

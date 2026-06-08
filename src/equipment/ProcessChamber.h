@@ -10,6 +10,7 @@ class ProcessChamber {
         bool startVacuum();
         bool isProcessing() const;
         bool isWaferPresent() const;
+        bool isVacuumReady() const;
     private:
         bool processing;
         bool waferPresent;

@@ -14,6 +14,24 @@ bool MachineController::resetMachine() {
 bool MachineController::recoverMachine() {
     return stateMachine.transitionToState(MachineState::RECOVER);
 }
+bool MachineController::startProcessing(){
+    if (stateMachine.getCurrentState() != MachineState::LOADING) {
+        return false;
+    }
+
+    if (!processChamber.isVacuumReady()) {
+        return false;
+    }
+
+    if (!processChamber.startProcessing()) {
+        return false;
+    }
+
+    return stateMachine.transitionToState(
+        MachineState::PROCESSING
+    );
+
+}
 
 bool MachineController::initDone() {
     return stateMachine.transitionToState(MachineState::LOADING);
@@ -51,15 +69,8 @@ bool MachineController::waferLoaded()
     if (!processChamber.startVacuum()) {
         return false;
     }
+    return true;
 
-
-    if (!processChamber.startProcessing()) {
-        return false;
-    }
-
-    return stateMachine.transitionToState(
-        MachineState::PROCESSING
-    );
 }
 bool MachineController::waferUnloaded() {
     if( stateMachine.getCurrentState() != MachineState::UNLOADING){
@@ -75,6 +86,10 @@ bool MachineController::waferUnloaded() {
         return false;
     }
     return stateMachine.transitionToState(MachineState::DONE);
+}
+
+bool MachineController::vacuumReady() {
+    return processChamber.isVacuumReady();
 }
 
 bool MachineController::faultDetected() {
