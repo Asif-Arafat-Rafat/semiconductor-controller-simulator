@@ -1,5 +1,10 @@
 #include "ProcessChamber.h"
+namespace {
 
+constexpr double MIN_PROCESS_TEMPERATURE = 293.15;
+constexpr double MAX_PROCESS_TEMPERATURE = 303.15;
+
+}
 ProcessChamber::ProcessChamber()
     : waferPresent(false),
       processing(false)
@@ -8,7 +13,7 @@ ProcessChamber::ProcessChamber()
 
 bool ProcessChamber::startProcessing()
 {
-    if (!waferPresent || processing || !vacuumSystem.isVacuumReady()) {
+    if (!waferPresent || processing || !vacuumSystem.isVacuumReady() || !isTemperatureSafe()) {
         return false;
     }
 
@@ -64,4 +69,18 @@ bool ProcessChamber::unloadWafer()
 
     waferPresent = false;
     return true;
+}
+
+double ProcessChamber::readTemperature() const
+{
+    return temperatureSensor.readTemperature();
+}
+
+void ProcessChamber::setTemperature(double temp){
+    this->temperatureSensor.setTemperature(temp);
+}
+
+bool ProcessChamber::isTemperatureSafe(){
+    double temp = temperatureSensor.readTemperature();
+    return temp>=MIN_PROCESS_TEMPERATURE &&temp<=MAX_PROCESS_TEMPERATURE;
 }

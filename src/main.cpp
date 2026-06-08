@@ -58,6 +58,8 @@ int main()
 {    
     MachineController controller;
 
+    controller.setTemperature(310.0);
+
     std::cout << "Semiconductor Machine Controller\n";
     std::cout << "================================\n\n";
 

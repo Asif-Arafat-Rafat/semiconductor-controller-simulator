@@ -6,7 +6,6 @@ bool MachineController::startMachine() {
     return stateMachine.transitionToState(MachineState::INIT);
 }
 
-
 bool MachineController::resetMachine() {
     return stateMachine.transitionToState(MachineState::IDLE);
 }
@@ -14,6 +13,7 @@ bool MachineController::resetMachine() {
 bool MachineController::recoverMachine() {
     return stateMachine.transitionToState(MachineState::RECOVER);
 }
+
 bool MachineController::startProcessing(){
     if (stateMachine.getCurrentState() != MachineState::LOADING) {
         return false;
@@ -47,7 +47,6 @@ bool MachineController::processingDone() {
     return stateMachine.transitionToState(MachineState::UNLOADING);
 }
 
-
 bool MachineController::waferLoaded()
 {
     if (stateMachine.getCurrentState() != MachineState::LOADING) {
@@ -72,6 +71,7 @@ bool MachineController::waferLoaded()
     return true;
 
 }
+
 bool MachineController::waferUnloaded() {
     if( stateMachine.getCurrentState() != MachineState::UNLOADING){
         return false;
@@ -94,6 +94,10 @@ bool MachineController::vacuumReady() {
 
 bool MachineController::faultDetected() {
     return stateMachine.getCurrentState() == MachineState::ERROR;
+}
+
+void MachineController::setTemperature(double temp){
+    processChamber.setTemperature(temp);
 }
 
 MachineState MachineController::getCurrentState() const {

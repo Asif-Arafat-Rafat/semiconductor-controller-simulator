@@ -17,11 +17,11 @@ public:
     bool startPump();
     bool vacuumReady();
     bool faultDetected();
-
+    void setTemperature(double temp);
     MachineState getCurrentState() const;
 private:
     StateMachine stateMachine;
     WaferHandler waferHandler;
     ProcessChamber processChamber;
-
+    
 };

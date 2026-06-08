@@ -9,16 +9,17 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(
+    
     semiconductor_controller
-
     src/main.cpp
-
     src/core/MachineController.cpp
     src/core/StateMachine.cpp
     src/equipment/WaferHandler.cpp
     src/equipment/ProcessChamber.cpp
     src/equipment/VacuumSystem.cpp
     src/sensors/PressureSensor.cpp
+    src/sensors/TemperatureSensor.cpp
+
 )
 
 target_include_directories(
