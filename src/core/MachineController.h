@@ -14,9 +14,9 @@ public:
     bool processingDone();
     bool waferLoaded();
     bool waferUnloaded();
-    bool startPump();
     bool vacuumReady();
     bool faultDetected();
+    bool handleFault();
     void setTemperature(double temp);
     MachineState getCurrentState() const;
 private:

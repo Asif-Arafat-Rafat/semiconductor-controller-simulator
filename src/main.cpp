@@ -55,98 +55,22 @@ void printState(
 }
 
 int main()
-{    
-    MachineController controller;
+{MachineController controller;
 
-    controller.setTemperature(300.0);
+controller.startMachine();
+controller.initDone();
 
-    std::cout << "Semiconductor Machine Controller\n";
-    std::cout << "================================\n\n";
+controller.setTemperature(310.0);
 
-    printState(
-        "Initial",
-        controller.getCurrentState()
-    );
+std::cout << "Fault detected: "
+          << controller.faultDetected()
+          << '\n';
 
-    if (!controller.startMachine()) {
-        std::cout << "Failed to start machine\n";
-        return 1;
-    }
+std::cout << "Handle fault: "
+          << controller.handleFault()
+          << '\n';
 
-    printState(
-        "Start",
-        controller.getCurrentState()
-    );
-
-    if (!controller.initDone()) {
-        std::cout << "Initialization failed\n";
-        return 1;
-    }
-
-    printState(
-        "Initialization complete",
-        controller.getCurrentState()
-    );
-
-    if (!controller.waferLoaded()) {
-        std::cout << "Wafer loading failed\n";
-        return 1;
-    }
-
-    printState(
-        "Wafer loaded",
-        controller.getCurrentState()
-    );
-
-    std::cout << "Waiting for vacuum...\n";
-
-    while (!controller.vacuumReady()) {
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(200)
-        );
-    }
-
-    std::cout << "Vacuum ready\n";
-
-    if (!controller.startProcessing()) {
-        std::cout << "Failed to start processing\n";
-        return 1;
-    }
-
-    printState(
-        "Processing started",
-        controller.getCurrentState()
-    );
-
-    if (!controller.processingDone()) {
-        std::cout << "Processing failed\n";
-        return 1;
-    }
-
-    printState(
-        "Process complete",
-        controller.getCurrentState()
-    );
-
-    if (!controller.waferUnloaded()) {
-        std::cout << "Wafer unloading failed\n";
-        return 1;
-    }
-
-    printState(
-        "Wafer unloaded",
-        controller.getCurrentState()
-    );
-
-    if (!controller.resetMachine()) {
-        std::cout << "Reset failed\n";
-        return 1;
-    }
-
-    printState(
-        "Reset",
-        controller.getCurrentState()
-    );
-
-    return 0;
-};
+std::cout << "Current state: "
+          << stateToString(controller.getCurrentState())
+          << '\n';
+        };

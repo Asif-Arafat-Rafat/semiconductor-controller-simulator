@@ -93,7 +93,18 @@ bool MachineController::vacuumReady() {
 }
 
 bool MachineController::faultDetected() {
-    return stateMachine.getCurrentState() == MachineState::ERROR;
+    return !processChamber.isTemperatureSafe();
+}
+
+bool MachineController::handleFault(){
+    if (!faultDetected()) {
+        return false;
+    }
+
+    return stateMachine.transitionToState(
+        MachineState::ERROR
+    );
+
 }
 
 void MachineController::setTemperature(double temp){
