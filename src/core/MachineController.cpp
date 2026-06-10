@@ -1,6 +1,17 @@
 #include "MachineController.h"
 
-MachineController::MachineController() : stateMachine() {}
+MachineController::MachineController() : stateMachine(),monitoring(true) {
+    monitorThread=std::thread(&MachineController::monitorLoop,this);
+}
+
+MachineController::~MachineController()
+{
+    monitoring = false;
+
+    if (monitorThread.joinable()) {
+        monitorThread.join();
+    }
+}
 
 bool MachineController::startMachine() {
     return stateMachine.transitionToState(MachineState::INIT);
@@ -92,7 +103,7 @@ bool MachineController::vacuumReady() {
     return processChamber.isVacuumReady();
 }
 
-bool MachineController::faultDetected() {
+bool MachineController::faultDetected() const {
     return !processChamber.isTemperatureSafe();
 }
 
@@ -111,6 +122,32 @@ void MachineController::setTemperature(double temp){
     processChamber.setTemperature(temp);
 }
 
+void MachineController::monitorLoop()
+{
+    while (monitoring) {
+
+        if (faultDetected()) {
+            handleFault();
+        }
+
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(100)
+        );
+    }
+}
+void MachineController::startMonitoring()
+{
+    if (monitoring) {
+        return;
+    }
+
+    monitoring = true;
+
+    monitorThread = std::thread(
+        &MachineController::monitorLoop,
+        this
+    );
+}
 MachineState MachineController::getCurrentState() const {
     return stateMachine.getCurrentState();
 }

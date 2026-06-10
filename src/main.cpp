@@ -55,20 +55,17 @@ void printState(
 }
 
 int main()
-{MachineController controller;
+    {MachineController controller;
 
+controller.startMonitoring();
 controller.startMachine();
 controller.initDone();
 
 controller.setTemperature(310.0);
 
-std::cout << "Fault detected: "
-          << controller.faultDetected()
-          << '\n';
-
-std::cout << "Handle fault: "
-          << controller.handleFault()
-          << '\n';
+std::this_thread::sleep_for(
+    std::chrono::milliseconds(300)
+);
 
 std::cout << "Current state: "
           << stateToString(controller.getCurrentState())
