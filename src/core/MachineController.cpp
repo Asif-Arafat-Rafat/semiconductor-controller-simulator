@@ -21,8 +21,19 @@ bool MachineController::resetMachine() {
     return stateMachine.transitionToState(MachineState::IDLE);
 }
 
-bool MachineController::recoverMachine() {
-    return stateMachine.transitionToState(MachineState::RECOVER);
+bool MachineController::recoverMachine()
+{
+    if (stateMachine.getCurrentState() != MachineState::ERROR) {
+        return false;
+    }
+
+    if (faultDetected()) {
+        return false;
+    }
+
+    return stateMachine.transitionToState(
+        MachineState::RECOVER
+    );
 }
 
 bool MachineController::startProcessing(){

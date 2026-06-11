@@ -55,19 +55,42 @@ void printState(
 }
 
 int main()
-    {MachineController controller;
+{
+    MachineController controller;
 
-controller.startMonitoring();
-controller.startMachine();
-controller.initDone();
+    controller.startMachine();
+    controller.initDone();
 
-controller.setTemperature(310.0);
+    // Create a temperature fault
+    controller.setTemperature(310.0);
 
-std::this_thread::sleep_for(
-    std::chrono::milliseconds(300)
-);
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(300)
+    );
 
-std::cout << "Current state: "
-          << stateToString(controller.getCurrentState())
-          << '\n';
-        };
+    std::cout << "State after fault: "
+              << stateToString(controller.getCurrentState())
+              << '\n';
+
+    // Clear the fault
+    controller.setTemperature(298.0);
+
+    std::cout << "Recovery: "
+              << controller.recoverMachine()
+              << '\n';
+
+    std::cout << "State after recovery: "
+              << stateToString(controller.getCurrentState())
+              << '\n';
+
+    // Return to IDLE
+    std::cout << "Reset: "
+              << controller.resetMachine()
+              << '\n';
+
+    std::cout << "Final state: "
+              << stateToString(controller.getCurrentState())
+              << '\n';
+
+    return 0;
+};

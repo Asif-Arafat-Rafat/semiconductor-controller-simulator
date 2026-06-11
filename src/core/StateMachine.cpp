@@ -2,11 +2,15 @@
 
 StateMachine::StateMachine() : currentState(MachineState::IDLE) {}
 
-MachineState StateMachine::getCurrentState() const {
+MachineState StateMachine::getCurrentState() const
+{
+    std::lock_guard<std::mutex> lock(stateMutex);
+
     return currentState;
 }
 
 bool StateMachine::transitionToState(MachineState newState) {
+    std::lock_guard<std::mutex> lock(stateMutex);
     if (isValidTransition(currentState, newState)) {
         currentState = newState;
         return true;
