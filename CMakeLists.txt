@@ -20,7 +20,13 @@ add_executable(
     src/sensors/PressureSensor.cpp
     src/sensors/TemperatureSensor.cpp
     src/sensors/SensorManager.cpp
-
+    src/process/ProcessStep.cpp
+    src/process/ProcessRecipe.cpp
+    src/process/RecipeExecutor.cpp
+    src/core/EventBus.cpp
+    src/logging/Logger.cpp
+    src/process/RecipeLoader.cpp
+    
 )
 
 target_include_directories(

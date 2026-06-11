@@ -1,8 +1,12 @@
 #include "MachineController.h"
 
-MachineController::MachineController() : stateMachine(),monitoring(true) {
-    monitorThread=std::thread(&MachineController::monitorLoop,this);
-}
+MachineController::MachineController(EventBus& eventBus) : 
+    stateMachine(),
+    monitoring(true),
+    eventBus(eventBus) 
+    {
+        monitorThread=std::thread(&MachineController::monitorLoop,this);
+    }
 
 MachineController::~MachineController()
 {
@@ -123,10 +127,19 @@ bool MachineController::handleFault(){
         return false;
     }
 
-    return stateMachine.transitionToState(
+    bool transitioned = stateMachine.transitionToState(
         MachineState::ERROR
     );
 
+    if(transitioned) {
+        eventBus.publish({
+            EventType::FaultDetected,
+            stateMachine.getCurrentState(),
+            "Fault detected: Temperature is unsafe"
+        });
+    }
+
+    return transitioned;
 }
 
 void MachineController::setTemperature(double temp){
@@ -146,6 +159,11 @@ void MachineController::monitorLoop()
         );
     }
 }
+
+bool MachineController::isTemperatureSafe() const {
+    return processChamber.isTemperatureSafe();
+}
+
 void MachineController::startMonitoring()
 {
     if (monitoring) {

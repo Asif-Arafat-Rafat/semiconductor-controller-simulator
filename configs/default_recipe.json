@@ -1,0 +1,20 @@
+{
+    "name": "Wafer Deposition",
+    "steps": [
+        {
+            "name": "Heat",
+            "targetTemperature": 300.0,
+            "durationSeconds": 2
+        },
+        {
+            "name": "Deposition",
+            "targetTemperature": 300.0,
+            "durationSeconds": 5
+        },
+        {
+            "name": "Cool",
+            "targetTemperature": 295.0,
+            "durationSeconds": 3
+        }
+    ]
+}

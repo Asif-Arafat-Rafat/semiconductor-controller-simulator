@@ -1,96 +1,197 @@
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #include "core/MachineController.h"
-#include <chrono>
-#include <thread>
-#include "equipment/WaferHandler.h"
-#include "equipment/VacuumSystem.h"
-#include "sensors/PressureSensor.h"
-
-const char* stateToString(MachineState state)
-{
-    switch (state) {
-
-    case MachineState::IDLE:
-        return "IDLE";
-
-    case MachineState::INIT:
-        return "INITIALIZING";
-
-    case MachineState::LOADING:
-        return "LOADING";
-
-    case MachineState::PROCESSING:
-        return "PROCESSING";
-
-    case MachineState::UNLOADING:
-        return "UNLOADING";
-
-    case MachineState::DONE:
-        return "COMPLETED";
-
-    case MachineState::ERROR:
-        return "ERROR";
-
-    case MachineState::RECOVER:
-        return "RECOVERY";
-
-    case MachineState::SHUTDOWN:
-        return "SHUTDOWN";
-    }
-
-    return "UNKNOWN";
-}
-
-void printState(
-    const char* action,
-    MachineState state
-)
-{
-    std::cout
-        << action
-        << " -> "
-        << stateToString(state)
-        << '\n';
-}
+#include "process/ProcessRecipe.h"
+#include "process/RecipeExecutor.h"
+#include "process/RecipeLoader.h"
+#include "core/EventBus.h"
+#include "logging/Logger.h"
 
 int main()
 {
-    MachineController controller;
+    EventBus eventBus;
+
+    MachineController controller(eventBus);
+
+    Logger logger("logs/machine.log");
+
+    // Subscribe to system events
+    eventBus.subscribe(
+        [&logger](const Event& event) {
+
+            switch (event.type)
+            {
+            case EventType::RecipeStarted:
+                logger.log(
+                    LogLevel::INFO,
+                    "Recipe started: " + event.message
+                );
+                break;
+
+            case EventType::RecipeStepStarted:
+                logger.log(
+                    LogLevel::INFO,
+                    "Step started: " + event.message
+                );
+                break;
+
+            case EventType::RecipeCompleted:
+                logger.log(
+                    LogLevel::INFO,
+                    "Recipe completed: " + event.message
+                );
+                break;
+
+            case EventType::FaultDetected:
+                logger.log(
+                    LogLevel::ERROR,
+                    "Fault: " + event.message
+                );
+                break;
+
+            case EventType::MachineStateChanged:
+                logger.log(
+                    LogLevel::INFO,
+                    "Machine state changed: " + event.message
+                );
+                break;
+            }
+        }
+    );
+
+    logger.log(
+        LogLevel::INFO,
+        "System started"
+    );
+
+    // --------------------------------------------------
+    // Fault detection test
+    // --------------------------------------------------
 
     controller.startMachine();
-    controller.initDone();
 
-    // Create a temperature fault
     controller.setTemperature(310.0);
 
     std::this_thread::sleep_for(
         std::chrono::milliseconds(300)
     );
 
-    std::cout << "State after fault: "
-              << stateToString(controller.getCurrentState())
-              << '\n';
+    std::cout << "State after fault: ";
 
-    // Clear the fault
-    controller.setTemperature(298.0);
+    if (controller.getCurrentState() == MachineState::ERROR)
+    {
+        std::cout << "ERROR\n";
+    }
+    else
+    {
+        std::cout << "OTHER\n";
+    }
 
-    std::cout << "Recovery: "
-              << controller.recoverMachine()
-              << '\n';
+    // --------------------------------------------------
+    // Stop the fault test before running the recipe
+    // --------------------------------------------------
 
-    std::cout << "State after recovery: "
-              << stateToString(controller.getCurrentState())
-              << '\n';
+    controller.setTemperature(298.15);
 
-    // Return to IDLE
-    std::cout << "Reset: "
-              << controller.resetMachine()
-              << '\n';
+    controller.recoverMachine();
 
-    std::cout << "Final state: "
-              << stateToString(controller.getCurrentState())
-              << '\n';
+    controller.resetMachine();
+
+    // --------------------------------------------------
+    // Load recipe from JSON
+    // --------------------------------------------------
+
+    RecipeLoader loader;
+
+    ProcessRecipe recipe ("");
+    try {
+        recipe = loader.loadFromFile(
+            "configs/default_recipe.json"
+        );
+    }
+    catch(const std::exception& e){
+        logger.log(
+            LogLevel::ERROR,
+            "Failed to load recipe: " + std::string(e.what())
+        );
+        return 1;
+    }
+
+
+    std::cout
+        << "Loaded recipe: "
+        << recipe.getName()
+        << '\n';
+
+    std::cout
+        << "Recipe steps: "
+        << recipe.getSteps().size()
+        << '\n';
+
+    // --------------------------------------------------
+    // Execute recipe
+    // --------------------------------------------------
+
+    RecipeExecutor executor(
+        controller,
+        eventBus
+    );
+
+    if (executor.executeRecipe(recipe))
+    {
+        std::cout
+            << "Recipe executed successfully\n";
+    }
+    else
+    {
+        std::cout
+            << "Recipe execution failed\n";
+    }
+
+    // --------------------------------------------------
+    // Display execution status
+    // --------------------------------------------------
+
+    const auto& status =
+        executor.getStatus();
+
+    std::cout
+        << "Steps: "
+        << status.totalSteps
+        << '\n';
+
+    std::cout << "Final state: ";
+
+    switch (status.state)
+    {
+    case RecipeExecutionState::IDLE:
+        std::cout << "IDLE";
+        break;
+
+    case RecipeExecutionState::RUNNING:
+        std::cout << "RUNNING";
+        break;
+
+    case RecipeExecutionState::COMPLETED:
+        std::cout << "COMPLETED";
+        break;
+
+    case RecipeExecutionState::FAILED:
+        std::cout << "FAILED";
+        break;
+    }
+
+    std::cout << '\n';
+
+    if (!status.errorMessage.empty())
+    {
+        std::cout
+            << "Error: "
+            << status.errorMessage
+            << '\n';
+    }
 
     return 0;
-};
+}
