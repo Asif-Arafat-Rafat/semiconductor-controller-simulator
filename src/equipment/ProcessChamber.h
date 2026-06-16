@@ -1,20 +1,27 @@
 #pragma once
 #include "VacuumSystem.h"
 #include "../sensors/SensorManager.h"
-class ProcessChamber {
+#include "IProcessChamber.h"
+
+class ProcessChamber : public IProcessChamber {
     public:
         ProcessChamber();
-        bool loadWafer();
-        bool unloadWafer();
-        bool startProcessing();
-        bool doneProcessing();
-        bool startVacuum();
+
+        bool loadWafer() override;
+        bool unloadWafer() override;
+
+        bool startProcessing() override;
+        bool doneProcessing() override;
+
+        bool startVacuum() override;
+        bool isVacuumReady() const override;
+
+        bool isTemperatureSafe() const override;
+
         bool isProcessing() const;
         bool isWaferPresent() const;
-        bool isVacuumReady() const;
-        double readTemperature() const;
-        void setTemperature(double temp);
-        bool isTemperatureSafe() const;
+        double readTemperature() const override;
+        void setTemperature(double temperature) override;
     private:
         bool processing;
         bool waferPresent;

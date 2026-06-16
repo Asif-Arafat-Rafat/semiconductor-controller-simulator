@@ -8,12 +8,15 @@
 #include "process/RecipeLoader.h"
 #include "core/EventBus.h"
 #include "logging/Logger.h"
+#include "equipment/ProcessChamber.h"
+#include "equipment/WaferHandler.h"
 
 int main()
 {
     EventBus eventBus;
-
-    MachineController controller(eventBus);
+    ProcessChamber processChamber;
+    WaferHandler waferHandler;
+    MachineController controller(eventBus,processChamber,waferHandler);
 
     Logger logger("logs/machine.log");
 

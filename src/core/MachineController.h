@@ -5,11 +5,11 @@
 
 #include "EventBus.h"
 #include "StateMachine.h"
-#include "../equipment/ProcessChamber.h"
-#include "../equipment/WaferHandler.h"
+#include "../equipment/IProcessChamber.h"
+#include "../equipment/IWaferHandler.h"
 class MachineController{
 public:
-    explicit MachineController(EventBus& eventBus);
+    MachineController(EventBus& eventBus,IProcessChamber& processChamber,IWaferHandler& waferHandler);
     ~MachineController();
     bool startMachine();
     bool stopMachine();
@@ -38,8 +38,8 @@ private:
     std::thread monitorThread;
 
     StateMachine stateMachine;
-    WaferHandler waferHandler;
-    ProcessChamber processChamber;
+    IWaferHandler& waferHandler;
+    IProcessChamber& processChamber;
     
     EventBus& eventBus;
 };

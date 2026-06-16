@@ -1,12 +1,14 @@
 #include "MachineController.h"
 
-MachineController::MachineController(EventBus& eventBus) : 
+MachineController::MachineController(EventBus& eventBus,IProcessChamber& processChamber,IWaferHandler& waferHandler) : 
     stateMachine(),
     monitoring(true),
-    eventBus(eventBus) 
+    eventBus(eventBus),
+    processChamber(processChamber),
+    waferHandler(waferHandler)
     {
         monitorThread=std::thread(&MachineController::monitorLoop,this);
-    }
+    };
 
 MachineController::~MachineController()
 {
