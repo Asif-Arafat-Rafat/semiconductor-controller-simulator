@@ -179,6 +179,21 @@ void MachineController::startMonitoring()
         this
     );
 }
+
+bool MachineController::stopMachine()
+{
+    MachineState current =
+        stateMachine.getCurrentState();
+
+    if (current == MachineState::SHUTDOWN) {
+        return false;
+    }
+
+    return stateMachine.transitionToState(
+        MachineState::SHUTDOWN
+    );
+}
+
 MachineState MachineController::getCurrentState() const {
     return stateMachine.getCurrentState();
 }

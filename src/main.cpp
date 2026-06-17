@@ -1,200 +1,114 @@
-#include <iostream>
-#include <thread>
-#include <chrono>
-
 #include "core/MachineController.h"
-#include "process/ProcessRecipe.h"
-#include "process/RecipeExecutor.h"
-#include "process/RecipeLoader.h"
 #include "core/EventBus.h"
-#include "logging/Logger.h"
+
 #include "equipment/ProcessChamber.h"
 #include "equipment/WaferHandler.h"
 
+#include "communication/TcpServer.h"
+#include "communication/CommandHandler.h"
+
+#include "logging/Logger.h"
+
+#include <iostream>
+
 int main()
 {
-    EventBus eventBus;
-    ProcessChamber processChamber;
-    WaferHandler waferHandler;
-    MachineController controller(eventBus,processChamber,waferHandler);
-
     Logger logger("logs/machine.log");
-
-    // Subscribe to system events
-    eventBus.subscribe(
-        [&logger](const Event& event) {
-
-            switch (event.type)
-            {
-            case EventType::RecipeStarted:
-                logger.log(
-                    LogLevel::INFO,
-                    "Recipe started: " + event.message
-                );
-                break;
-
-            case EventType::RecipeStepStarted:
-                logger.log(
-                    LogLevel::INFO,
-                    "Step started: " + event.message
-                );
-                break;
-
-            case EventType::RecipeCompleted:
-                logger.log(
-                    LogLevel::INFO,
-                    "Recipe completed: " + event.message
-                );
-                break;
-
-            case EventType::FaultDetected:
-                logger.log(
-                    LogLevel::ERROR,
-                    "Fault: " + event.message
-                );
-                break;
-
-            case EventType::MachineStateChanged:
-                logger.log(
-                    LogLevel::INFO,
-                    "Machine state changed: " + event.message
-                );
-                break;
-            }
-        }
-    );
 
     logger.log(
         LogLevel::INFO,
-        "System started"
+        "System starting"
     );
 
     // --------------------------------------------------
-    // Fault detection test
+    // Core event system
     // --------------------------------------------------
 
-    controller.startMachine();
+    EventBus eventBus;
 
-    controller.setTemperature(310.0);
 
-    std::this_thread::sleep_for(
-        std::chrono::milliseconds(300)
+    // --------------------------------------------------
+    // Equipment
+    // --------------------------------------------------
+
+    ProcessChamber processChamber;
+    WaferHandler waferHandler;
+
+
+    // --------------------------------------------------
+    // Machine controller
+    // --------------------------------------------------
+
+    MachineController controller(
+        eventBus,
+        processChamber,
+        waferHandler
     );
 
-    std::cout << "State after fault: ";
-
-    if (controller.getCurrentState() == MachineState::ERROR)
-    {
-        std::cout << "ERROR\n";
-    }
-    else
-    {
-        std::cout << "OTHER\n";
-    }
 
     // --------------------------------------------------
-    // Stop the fault test before running the recipe
+    // Communication command handler
     // --------------------------------------------------
 
-    controller.setTemperature(298.15);
+    CommandHandler commandHandler(
+        controller
+    );
 
-    controller.recoverMachine();
-
-    controller.resetMachine();
 
     // --------------------------------------------------
-    // Load recipe from JSON
+    // TCP communication
     // --------------------------------------------------
 
-    RecipeLoader loader;
+    TcpServer server(
+        9000,
+        commandHandler
+    );
 
-    ProcessRecipe recipe ("");
-    try {
-        recipe = loader.loadFromFile(
-            "configs/default_recipe.json"
-        );
-    }
-    catch(const std::exception& e){
+
+    if (!server.start()) {
+
         logger.log(
             LogLevel::ERROR,
-            "Failed to load recipe: " + std::string(e.what())
+            "Failed to start TCP server"
         );
+
         return 1;
     }
 
-
-    std::cout
-        << "Loaded recipe: "
-        << recipe.getName()
-        << '\n';
-
-    std::cout
-        << "Recipe steps: "
-        << recipe.getSteps().size()
-        << '\n';
-
-    // --------------------------------------------------
-    // Execute recipe
-    // --------------------------------------------------
-
-    RecipeExecutor executor(
-        controller,
-        eventBus
+    logger.log(
+        LogLevel::INFO,
+        "TCP server started on port 9000"
     );
 
-    if (executor.executeRecipe(recipe))
-    {
-        std::cout
-            << "Recipe executed successfully\n";
-    }
-    else
-    {
-        std::cout
-            << "Recipe execution failed\n";
-    }
-
-    // --------------------------------------------------
-    // Display execution status
-    // --------------------------------------------------
-
-    const auto& status =
-        executor.getStatus();
 
     std::cout
-        << "Steps: "
-        << status.totalSteps
-        << '\n';
+        << "Semiconductor Controller Simulator\n";
 
-    std::cout << "Final state: ";
+    std::cout
+        << "TCP server listening on port 9000\n";
 
-    switch (status.state)
-    {
-    case RecipeExecutionState::IDLE:
-        std::cout << "IDLE";
-        break;
+    std::cout
+        << "Press ENTER to stop...\n";
 
-    case RecipeExecutionState::RUNNING:
-        std::cout << "RUNNING";
-        break;
 
-    case RecipeExecutionState::COMPLETED:
-        std::cout << "COMPLETED";
-        break;
+    std::cin.get();
 
-    case RecipeExecutionState::FAILED:
-        std::cout << "FAILED";
-        break;
-    }
 
-    std::cout << '\n';
+    // --------------------------------------------------
+    // Shutdown
+    // --------------------------------------------------
 
-    if (!status.errorMessage.empty())
-    {
-        std::cout
-            << "Error: "
-            << status.errorMessage
-            << '\n';
-    }
+    logger.log(
+        LogLevel::INFO,
+        "System shutting down"
+    );
+
+    server.stop();
+
+    logger.log(
+        LogLevel::INFO,
+        "System stopped"
+    );
 
     return 0;
 }

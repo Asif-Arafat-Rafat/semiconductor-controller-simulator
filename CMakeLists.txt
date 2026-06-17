@@ -26,28 +26,39 @@ add_executable(
     src/core/EventBus.cpp
     src/logging/Logger.cpp
     src/process/RecipeLoader.cpp
-    src/equipment/MockProcessChamber.cpp
-
-)
-add_executable(
-    machine_controller_test
-
-    tests/MachineControllerTest.cpp
-
-    src/core/StateMachine.cpp
-    src/core/MachineController.cpp
-    src/core/EventBus.cpp
-
-    src/equipment/WaferHandler.cpp
-    src/equipment/ProcessChamber.cpp
-    src/equipment/VacuumSystem.cpp
-    src/equipment/MockProcessChamber.cpp
-
-    src/sensors/TemperatureSensor.cpp
-    src/sensors/PressureSensor.cpp
-    src/sensors/SensorManager.cpp
+    src/communication/MessageSerialization.cpp
+    src/communication/CommandParser.cpp
+    src/communication/CommandHandler.cpp
+    src/communication/ProtocolSerializer.cpp
     src/communication/TcpServer.cpp
+
+
 )
+# add_executable(
+#     machine_controller_test
+
+#     tests/MachineControllerTest.cpp
+
+#     src/core/StateMachine.cpp
+#     src/core/MachineController.cpp
+#     src/core/EventBus.cpp
+
+#     src/equipment/WaferHandler.cpp
+#     src/equipment/ProcessChamber.cpp
+#     src/equipment/VacuumSystem.cpp
+#     src/equipment/MockProcessChamber.cpp
+
+#     src/sensors/TemperatureSensor.cpp
+#     src/sensors/PressureSensor.cpp
+#     src/sensors/SensorManager.cpp
+#     src/communication/TcpServer.cpp
+# )
+# add_executable(
+#     tcp_server_test
+
+#     tests/TcpServerTest.cpp
+#     src/communication/TcpServer.cpp
+# )
 target_include_directories(
     semiconductor_controller
     PRIVATE
